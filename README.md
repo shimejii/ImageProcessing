@@ -6,5 +6,5 @@ The lectures cover windows bmp files.
 The execution method is as follows:
 
 ```
-$ main.py [input_file] [output_file]
+$ python main.py [input_file] [output_file]
 ```
