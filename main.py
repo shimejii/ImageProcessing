@@ -3,8 +3,11 @@ import os
 from pathlib import Path
 from typing import Tuple
 from dataclasses import dataclass
+from collections import defaultdict
 
 BYTE_ORDER = 'little'
+CMD_SET = set(["binarize"])
+METHOD_SET = set(["Otsu"])
 
 @dataclass
 class FileHeader:
@@ -180,14 +183,138 @@ def write_win_bmp(path_file_out :str, file_header : FileHeader,
                 for k in range(bit_per_pixcel//8):
                     fp_out.write(img[i][j][k].to_bytes())
 
+def generate_histgram(img: list, bit_per_pixcel: int, height: int, width: int,
+                      power_of_two: bool = False) -> list:
+    histgram = []
+    if bit_per_pixcel == 8:
+        histgram.append(defaultdict(int))
+    elif bit_per_pixcel == 24:
+        histgram.append(defaultdict(int))
+        histgram.append(defaultdict(int))
+        histgram.append(defaultdict(int))
+    elif bit_per_pixcel == 32:
+        histgram.append(defaultdict(int))
+        histgram.append(defaultdict(int))
+        histgram.append(defaultdict(int))
+        histgram.append(defaultdict(int))
+              
+    else:
+        print(f'Cannot support this file bit_per_pixcel.\nbpp is {bit_per_pixcel}.', file=sys.stderr)
+        sys.exit(1)
+    
+    for i in range(height):
+        for j in range(width):
+            for k in range(bit_per_pixcel//8):
+                value = img[i][j][k]
+                if power_of_two:
+                    value *= value
+                histgram[k][value] += 1
+    
+    return histgram
+
+def generate_cumulativeSum_count(histgram: list, index_histgram: int, power_of_two: bool = False) -> defaultdict:
+    cumulativeSum_count = defaultdict(int)
+    cur_histgram = histgram[index_histgram]
+    cumulativeSum_count[0] = cur_histgram[0]
+    stop = 256
+    if power_of_two:
+        stop = 256**2
+    for value in range(1,stop):
+        cumulativeSum_count[value] = cumulativeSum_count[value-1] + cur_histgram[value]
+    return cumulativeSum_count
+
+def generate_cumulativeSum_valueXcount(histgram: list, index_histgram: int, power_of_two: bool = False) -> defaultdict:
+    cumulativeSum_valueXcount = defaultdict(int)
+    cur_histgram = histgram[index_histgram]
+    cumulativeSum_valueXcount[0] = 0 * cur_histgram[0]
+    stop = 256
+    if power_of_two:
+        stop = 256**2
+    for value in range(1,stop):
+        cumulativeSum_valueXcount[value] = cumulativeSum_valueXcount[value-1] + (value * cur_histgram[value])
+        
+    return cumulativeSum_valueXcount
+
+def discriminatn_analysis_method(img: list, bit_per_pixcel: int, height: int, width: int, apply_dim: int) -> Tuple[int, float]:
+    # get histgram
+    histgram_noraml = generate_histgram(img, bit_per_pixcel, height, width, power_of_two=False)
+    
+    # cummulative sum
+    cumulativeSum_count = generate_cumulativeSum_count(histgram_noraml, apply_dim, power_of_two=False)
+    cumulativeSum_valueXcount = generate_cumulativeSum_valueXcount(histgram_noraml, apply_dim, power_of_two=False)    
+    
+    threshold_best = -1
+    variance_between_class_max = -1
+    for threshold in range(1,255):
+        # mean
+        ## total
+        sum_total = cumulativeSum_valueXcount[255]
+        num_total = cumulativeSum_count[255]
+        mu_total = sum_total / num_total
+        
+        ## class1 (value <= threshold)
+        sum_class1 = cumulativeSum_valueXcount[threshold]
+        num_class1 = cumulativeSum_count[threshold]
+        mu_class1 = sum_class1 / num_class1
+        
+        ## class2 (value > threshold)
+        sum_class2 = cumulativeSum_valueXcount[255] - cumulativeSum_valueXcount[threshold]
+        num_class2 = cumulativeSum_count[255] - cumulativeSum_count[threshold]
+        mu_class2 = sum_class2 / num_class2
+        
+        # occurence probability
+        ## class1
+        oc_probability_class1 = num_class1 / num_total
+        ## class2
+        oc_probability_class2 = num_class2 / num_total
+        
+        # between-class variance
+        variance_between_class = oc_probability_class1*(mu_class1 - mu_total)**2 + oc_probability_class2*(mu_class2 - mu_total)**2
+        
+        if variance_between_class_max < variance_between_class:
+            threshold_best = threshold
+            variance_between_class_max = variance_between_class
+    
+    return threshold_best, variance_between_class_max
+
+def binarization(img: list, bit_per_pixcel: int, height: int, width: int, apply_dim: int, threshold: int) -> list:
+    for i in range(height):
+        for j in range(width):
+            for dim in range(bit_per_pixcel//8):
+                if dim == apply_dim:       
+                    if img[i][j][dim] >= threshold:
+                        img[i][j][dim] = 255
+                    else:
+                        img[i][j][dim] = 0
+                else:
+                    img[i][j][dim] = 0
+    return img
+        
+def process(img: list, bit_per_pixcel: int, height: int, width: int, cmd: str, method: str, apply_dim: int):
+    if cmd == "binarize":
+        threhsold = -1
+        if method == "Otsu":
+            print("calculate threshold with Otsu's method.")
+            threhsold, variance_between_class = discriminatn_analysis_method(img, bit_per_pixcel, height, width, apply_dim)
+            print(f"threshold : {threhsold}, variance_between_class : {variance_between_class}")
+        else:
+            print(f"{method} is not supported.")
+        
+        binarization(img, bit_per_pixcel, height, width, apply_dim, threhsold)
+    
+
 def main(argv: list):
     if len(argv) < 3:
-        print(f'There are few arguments. len(argv) is {len(argv)}\nusage: python main.py [input_file] [output_file]', file=sys.stderr)
+        print(f'There are few arguments. len(argv) is {len(argv)}\nusage: python main.py input_file output_file [cmd method apply_dim]', file=sys.stderr)
         sys.exit(1)
-    if len(argv) > 3:
-        print(f'Too many arguments. len(argv) is {len(argv)}\nusage: python main.py [input_file] [output_file]', file=sys.stderr)
+    elif len(argv) > 6:
+        print(f'Too many arguments. len(argv) is {len(argv)}\nusage: python main.py input_file output_file [cmd method apply_dim]', file=sys.stderr)
         sys.exit(1)
-        
+    elif len(argv) != 6:
+        print('usage: python main.py input_file output_file [cmd method apply_dim]', file=sys.stderr)
+        sys.exit(1)
+    
+    # get file path
     file_input = argv[1]
     file_output = argv[2]
     path_file_input = Path(file_input).resolve()
@@ -195,7 +322,24 @@ def main(argv: list):
     print(f'path_file_input : {path_file_input}')
     print(f'path_file_output : {path_file_output}')
     
+    # get cmd and method
+    cmd = ""
+    method = ""
+    if len(argv) == 6:
+        cmd = argv[3]
+        method = argv[4]
+        apply_dim = int(argv[5])
+    
+    if cmd not in CMD_SET:
+        print(f"{cmd} is not supported.", file=sys.stderr)
+    if method not in METHOD_SET:
+        print(f"{method} is not supported.", file=sys.stderr)
+    
     file_header, info_header, color_palletes, img = read_win_bmp(path_file_input)
+    bit_per_pixcel = int.from_bytes(info_header.bcBitCount, BYTE_ORDER)
+    height = int.from_bytes(info_header.bcHeight, BYTE_ORDER)
+    width = int.from_bytes(info_header.bcWidth, BYTE_ORDER)
+    process(img, bit_per_pixcel, height, width, cmd, method, apply_dim)
     write_win_bmp(file_output, file_header, info_header, color_palletes, img)
     
     
