@@ -16,8 +16,10 @@ $ python main.py INPUT_FILE OUTPUT_FILE [CMD METHOD APPLY_DIM]
 
 ### about CMD
 - binarize
-Performs binarization on the APPLY_DIM dimension of the imput file. The threshold is calculated according to METHOD.
+
+    Performs binarization on the APPLY_DIM dimension of the imput file. The threshold is calculated according to METHOD.
 
 #### about METHOD
 - Otsu
-use Otsu's method
+
+    use Otsu's method
