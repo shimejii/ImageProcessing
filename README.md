@@ -10,9 +10,18 @@ Supported features are as follows:
 ## usage
 The execution method is as follows:
 
-```
-$ python main.py INPUT_FILE OUTPUT_FILE [CMD METHOD APPLY_DIM] 
-```
+1. CLI
+
+    ```
+    $ git clone https://github.com/shimejii/ImageProcessing.git
+    $ cd ImageProcessing/common/
+    $ python main.py INPUT_FILE OUTPUT_FILE [CMD METHOD APPLY_DIM] 
+    ```
+
+2. Web browser
+
+    please access [this web application](https://imgprocess-6f80676dca86.herokuapp.com/)
+
 
 ### about CMD
 - binarize
