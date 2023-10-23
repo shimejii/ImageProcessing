@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ super() }}{% endblock %}
+{% block content %}
+<h1>Upload Windows BMP file</h1>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="アップロード">
+</form>
+{% endblock %}
