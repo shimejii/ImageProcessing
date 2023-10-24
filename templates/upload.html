@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ super() }}{% endblock %}
 {% block content %}
-<h1>Upload Windows BMP file</h1>
+<h1 class="mb-3">Upload Windows BMP file</h1>
 <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="file">
-    <input type="submit" value="アップロード">
+    <div class="row">
+        <div class="col-sm">
+            <input type="file" name="file" class="form-control input-lg">
+        </div>
+        <div class="col-sm">
+        <button type="submit" class="btn btn-primary btn-lg">アップロード</button>
+        </div>
+    </div>
 </form>
 {% endblock %}
