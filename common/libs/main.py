@@ -131,7 +131,7 @@ def read_win_bmp(path_file_in: str) -> Tuple[FileHeader, InfoHeader, dict, list]
             for _ in range(width):
                 pixcel = []
                 for k in range(bit_per_pixcel//8):
-                    pixcel.append(int.from_bytes(fp_in.read(1)))
+                    pixcel.append(int.from_bytes(fp_in.read(1), BYTE_ORDER))
                 line.append(pixcel)
             img.append(line)
         img.reverse()
@@ -181,7 +181,7 @@ def write_win_bmp(path_file_out :str, file_header : FileHeader,
         for i in range(height):
             for j in range(width):
                 for k in range(bit_per_pixcel//8):
-                    fp_out.write(img[i][j][k].to_bytes())
+                    fp_out.write(img[i][j][k].to_bytes(length=1, byteorder=BYTE_ORDER))
 
 def generate_histgram(img: list, bit_per_pixcel: int, height: int, width: int,
                       power_of_two: bool = False) -> list:

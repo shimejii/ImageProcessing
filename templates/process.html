@@ -2,5 +2,21 @@
 {% block title %}{{ super() }}{% endblock %}
 {% block content %}
 <h1>Process Windows BMP file</h1>
+<p>current image</p>
 <img src="{{ filepath }}" alt="posted image file">
+<div>
+    <form method="POST">
+        <input type="radio" name="process" value="binarize" checked>
+        <label>binarization</label> 
+        <input type="radio" name="binarize-method" value="Otsu" checked>
+        <label>Otsu's method</label>
+        <input type="radio" name="apply_dim" value="0" checked>
+        <label>Blue</label>
+        <input type="radio" name="apply_dim" value="1">
+        <label>Green</label>
+        <input type="radio" name="apply_dim" value="2">
+        <label>Red</label>
+        <p><input type="submit" value="process"></p>
+    </form>
+</div>
 {% endblock %}
