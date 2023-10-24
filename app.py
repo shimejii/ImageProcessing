@@ -21,7 +21,7 @@ def home():
 
 @app.route('/process')
 def process():
-    return render_template('process.html', filepath=FILE_PATH)
+    return render_template('process.html', filepath=FILE_PATH[1:])
 
 if __name__ == '__main__':
     app.run()
