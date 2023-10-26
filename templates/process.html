@@ -2,8 +2,25 @@
 {% block title %}{{ super() }}{% endblock %}
 {% block content %}
 <h1>Process Windows BMP file</h1>
-<p>current image</p>
-<img src="{{ filepath }}" alt="posted image file">
+<h2>about image</h2>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a href="#cur_image" lass="nav-link" data-bs-toggle="tab">image</a>
+    </li>
+    <li class="nav-item">
+        <a href="#histgram" class="nav-link" data-bs-toggle="tab">histgram</a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div id="cur_image" class="tab-pane active">
+        <img src="{{ filepath }}" alt="posted image file">
+    </div>
+    <div id="histgram" class="tab-pane">
+        <p>display histgram</p>
+        <p>comming soon</p>
+    </div>
+</div>
+<h2>about process</h2>
 <div>
     <form method="POST">
         <div>
