@@ -4,10 +4,12 @@ from pathlib import Path
 from typing import Tuple
 from dataclasses import dataclass
 from collections import defaultdict
+from matplotlib import pyplot as plt
 
 BYTE_ORDER = 'little'
 CMD_SET = set(["binarize"])
 METHOD_SET = set(["Otsu"])
+COLOR_ORDER = ["Blue", "Red", "Green", "Reserved"]
 
 @dataclass
 class FileHeader:
@@ -289,6 +291,49 @@ def binarization(img: list, bit_per_pixcel: int, height: int, width: int, apply_
                 else:
                     img[i][j][dim] = 0
     return img
+
+def defaultDictHistgrams2List(histgram: list, bit_per_pixcel: int):
+    histgram_list = []
+    for i in range(bit_per_pixcel//8):
+        histgram_cur = []
+        for value in range(256):
+            histgram_cur.append(histgram[i][value])
+        histgram_list.append(histgram_cur)
+    return histgram_list
+
+def plot_histgram(img: list, bit_per_pixcel: int, height: int, width: int):
+    if bit_per_pixcel == 8:
+        pass
+    elif bit_per_pixcel == 24:
+        pass
+    elif bit_per_pixcel == 32:
+        pass
+    else:
+        print("This bit_per_pixcel {bit_per_pixcel} is not supported.", sys.stderr)
+    
+    x = list(range(256))
+    histgrams_defaultdict = generate_histgram(img, bit_per_pixcel, height, width, False)
+    histgrams_list = defaultDictHistgrams2List(histgrams_defaultdict, bit_per_pixcel) 
+    
+    
+    fig, ax = plt.subplots(1, bit_per_pixcel//8)
+    
+    if bit_per_pixcel == 8:
+        ax.plot(x, histgrams_list[0])
+        ax.set_xlabel("value")
+        ax.set_ylabel("histgram frequency")
+        ax.set_title("")
+        return fig, ax
+
+    for i in range(bit_per_pixcel//8):
+        ax[i].plot(x, histgrams_list[i])
+        ax[i].set_xlabel("value")
+        ax[i].set_ylabel("histgram frequency")
+        ax[i].set_title(COLOR_ORDER[i])
+    
+    
+    return fig, ax
+    
         
 def process(img: list, bit_per_pixcel: int, height: int, width: int, cmd: str, method: str, apply_dim: int):
     if cmd == "binarize":
