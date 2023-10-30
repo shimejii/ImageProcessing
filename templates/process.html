@@ -16,8 +16,72 @@
         <img src="{{ filepath }}" alt="posted image file">
     </div>
     <div id="histgram" class="tab-pane">
-        <p>display histgram</p>
-        <p>comming soon</p>
+        <canvas id="histgram_canvas_red" width="300" height="200"></canvas>
+        <canvas id="histgram_canvas_green" width="300" height="200"></canvas>
+        <canvas id="histgram_canvas_blue" width="300" height="200"></canvas>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js" integrity="sha512-VMsZqo0ar06BMtg0tPsdgRADvl0kDHpTbugCBBrL55KmucH6hP9zWdLIWY//OTfMnzz6xWQRxQqsUFefwHuHyg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            var ctx_red = document.getElementById('histgram_canvas_red').getContext('2d');
+            var ctx_green = document.getElementById('histgram_canvas_green').getContext('2d');
+            var ctx_blue = document.getElementById('histgram_canvas_blue').getContext('2d');
+
+            let x = [];
+            for (i=0; i < 256; i++) {
+                x.push(i);
+            }
+            let hist = {{ histgrams|tojson }};
+            console.log(hist);
+
+            var data_blue = {
+                labels: x,
+                datasets: [{
+                    label: 'histgram_blue',
+                    data: hist[0],
+                    borderColor: 'rgba(100, 100, 255, 1)',
+                }]
+            };
+
+            var data_green = {
+                labels: x,
+                datasets: [{
+                    label: 'histgram_green',
+                    data: hist[1],
+                    borderColor: 'rgba(100, 255, 100, 1)',
+                }]
+            };
+
+            var data_red = {
+                labels: x,
+                datasets: [{
+                    label: 'histgram_red',
+                    data: hist[2],
+                    borderColor: 'rgba(255, 100, 100, 1)',
+                }]
+            };
+
+            var histgram_blue = new Chart(
+                ctx_blue,
+                {
+                    type: 'line',
+                    data: data_blue,
+                }
+            );
+            var histgram_green = new Chart(
+                ctx_green,
+                {
+                    type: 'line',
+                    data: data_green,
+                }
+            );
+            var histgram_red = new Chart(
+                ctx_red,
+                {
+                    type: 'line',
+                    data: data_red,
+                }
+            );
+
+        </script>
     </div>
 </div>
 <h2>about process</h2>
