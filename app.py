@@ -26,9 +26,12 @@ def home():
     global FILE_HEADER
     global INFO_HEADER
     global COLOR_PALLETES
+    global IMG
     global BIT_PER_PIXCEL
     global HEIGHT
     global WIDTH
+    global HISTGRAMS_DICT
+    global HISTGRAMS
 
     if request.method == 'POST':
         # save img
@@ -45,7 +48,7 @@ def home():
         # hisrgram
         HISTGRAMS_DICT = main.generate_histgram(IMG, BIT_PER_PIXCEL, HEIGHT, WIDTH, False)
         HISTGRAMS = main.defaultDictHistgrams2List(HISTGRAMS_DICT, BIT_PER_PIXCEL)
-        return render_template('process.html', filepath=FILE_PATH[1:], histgrams=HISTGRAMS)
+        return redirect('/process')
     return render_template('upload.html')
 
 @app.route('/process', methods=['GET', 'POST'])
