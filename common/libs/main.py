@@ -252,23 +252,39 @@ def discriminatn_analysis_method(img: list, bit_per_pixcel: int, height: int, wi
         ## total
         sum_total = cumulativeSum_valueXcount[255]
         num_total = cumulativeSum_count[255]
-        mu_total = sum_total / num_total
+        try:
+            mu_total = sum_total / num_total
+        except ZeroDivisionError:
+            mu_total = 0
         
         ## class1 (value <= threshold)
         sum_class1 = cumulativeSum_valueXcount[threshold]
         num_class1 = cumulativeSum_count[threshold]
-        mu_class1 = sum_class1 / num_class1
+        try:
+            mu_class1 = sum_class1 / num_class1
+        except ZeroDivisionError:
+            mu_class1 = 0
         
         ## class2 (value > threshold)
         sum_class2 = cumulativeSum_valueXcount[255] - cumulativeSum_valueXcount[threshold]
         num_class2 = cumulativeSum_count[255] - cumulativeSum_count[threshold]
-        mu_class2 = sum_class2 / num_class2
+        try:
+            mu_class2 = sum_class2 / num_class2
+        except ZeroDivisionError:
+            mu_class2 = 0
         
         # occurence probability
         ## class1
-        oc_probability_class1 = num_class1 / num_total
+        try:
+            oc_probability_class1 = num_class1 / num_total
+        except ZeroDivisionError:
+            oc_probability_class1 = 0
+
         ## class2
-        oc_probability_class2 = num_class2 / num_total
+        try:
+            oc_probability_class2 = num_class2 / num_total
+        except ZeroDivisionError:
+            oc_probability_class2 = 0
         
         # between-class variance
         variance_between_class = oc_probability_class1*(mu_class1 - mu_total)**2 + oc_probability_class2*(mu_class2 - mu_total)**2
