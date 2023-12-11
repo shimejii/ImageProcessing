@@ -5,6 +5,7 @@ from typing import Tuple
 from dataclasses import dataclass
 from collections import defaultdict
 from matplotlib import pyplot as plt
+from my_exception import NotSupportedFileTypeError
 
 BYTE_ORDER = 'little'
 CMD_SET = set(["binarize"])
@@ -40,19 +41,15 @@ class ColorPalette:
     rgbRed : bytes
     rgbReserved : bytes
     
-def read_win_bmp(path_file_in: str) -> Tuple[FileHeader, InfoHeader, dict, list]:
-    if not os.path.exists(path_file_in):
-        print('input file does not exist.\n{path_file_in}', file=sys.stderr)
-        sys.exit(1)
-    with open(path_file_in, 'rb') as fp_in:
+def read_win_bmp(path_file_in: Path) -> Tuple[FileHeader, InfoHeader, dict, list]:
+    with path_file_in.open('rb') as fp_in:
         # header
         ## file header
         bfType = fp_in.read(2)
-        if bfType.decode('utf-8') != "BM":
-            print(f'This file is not Windows bigtmap. Signature is {bfType.decode(encoding="utf-8")}', file=sys.stderr)
-            fp_in.close()
-            sys.exit(1)
-            
+        if bfType != b"BM":
+            raise NotSupportedFileTypeError(
+                f"This file is not Windows bitmap. This file magic number is {bfType}"
+                )
         bfSize = fp_in.read(4)
         bfReserved1 = fp_in.read(2)
         bfReserved2 = fp_in.read(2)
@@ -66,29 +63,37 @@ def read_win_bmp(path_file_in: str) -> Tuple[FileHeader, InfoHeader, dict, list]
 
         ## info header
         bcSize = fp_in.read(4)
+        if int.from_bytes(bcSize, BYTE_ORDER) == 12:
+            raise NotSupportedFileTypeError(
+                "This file is OS/2 Bitmap. Not supported."
+            )
         if int.from_bytes(bcSize, BYTE_ORDER) != 40:
-            print(f'This file is not Windows bigtmap.', file=sys.stderr)
-            fp_in.close()
-            sys.exit(1)
+            raise NotSupportedFileTypeError(
+                f"Windows bit map's info header must be 40 bytes. Not supported.¥n bcSize : {int.from_bytes(bcSize, BYTE_ORDER)}"
+            )
 
         bcWidth = fp_in.read(4)
         bcHeight = fp_in.read(4)
         bcPlanes = fp_in.read(2)
         bcBitCount = fp_in.read(2)
+
         bit_per_pixcel = int.from_bytes(bcBitCount, BYTE_ORDER)
-        
-        if bit_per_pixcel == 8:
-            pass
-        elif bit_per_pixcel == 24:
-            pass
-        elif bit_per_pixcel == 32:
+        if bit_per_pixcel == 32:
             pass
         else:
-            print(f'Cannot support this file bit_per_pixcel.\nbpp is {bit_per_pixcel}.', file=sys.stderr)
-            fp_in.close()
-            sys.exit(1)
-        
+            raise NotSupportedFileTypeError(
+                f"This file type is not supported.¥n bit_per_pixcel : {bit_per_pixcel}."
+            )
+
         biCompression = fp_in.read(4)
+        biCompression_int = int.from_bytes(biCompression, BYTE_ORDER)
+        if biCompression_int == 0:
+            pass
+        else:
+            raise NotSupportedFileTypeError(
+                f"This file type is not supported.¥nbiCompression : {biCompression_int}."
+            )
+
         biSizeImage = fp_in.read(4)
         biXPixPerMeter = fp_in.read(4)
         biYPixPerMeter = fp_in.read(4)
@@ -108,9 +113,9 @@ def read_win_bmp(path_file_in: str) -> Tuple[FileHeader, InfoHeader, dict, list]
         palettes = {}
         ## color paret
         if 1 <= int.from_bytes(bcBitCount, BYTE_ORDER) and int.from_bytes(bcBitCount, BYTE_ORDER) <= 8:
-            num_color_paret = -1
+            num_color_paret = int.from_bytes(biClrUsed, BYTE_ORDER)
             if biClrUsed == 0:
-                num_color_paret = bcBitCount
+                num_color_paret = int.from_bytes(bcBitCount, BYTE_ORDER)
             
             for i in range(num_color_paret):
                 rgbBlue = fp_in.read(1)
@@ -378,8 +383,8 @@ def main(argv: list):
     # get file path
     file_input = argv[1]
     file_output = argv[2]
-    path_file_input = Path(file_input).resolve()
-    path_file_output = Path(file_output).resolve()
+    path_file_input = Path(file_input)
+    path_file_output = Path(file_output)
     print(f'path_file_input : {path_file_input}')
     print(f'path_file_output : {path_file_output}')
     
