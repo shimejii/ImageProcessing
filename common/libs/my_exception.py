@@ -1,0 +1,2 @@
+class NotSupportedFileTypeError(Exception):
+    pass
