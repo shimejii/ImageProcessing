@@ -1,54 +1,54 @@
 from flask import Flask
+from flask import flash
 from flask import request
 from flask import render_template
 from flask import redirect
+from flask import url_for
+from werkzeug.utils import secure_filename
 import os
 import main
 import sys
+from pathlib import Path
 
-FILE_PATH = ""
-FILE_HEADER = None
-INFO_HEADER = None
-COLOR_PALLETES = None
-IMG = None
-BIT_PER_PIXCEL = None
-HEIGHT = None
-WIDTH = None
-HISTGRAMS_DICT = None
-HISTGRAMS = None
+UPLOAD_FOLDER = '/tmp/'
+ALLOWED_EXTENSIONS = {'bmp', 'rle', 'dib'}
 
-app = Flask(__name__, static_folder='/tmp/')
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowd_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/upload', methods=['GET', 'POST'])
 def home():
-    global FILE_PATH 
-    global FILE_HEADER
-    global INFO_HEADER
-    global COLOR_PALLETES
-    global IMG
-    global BIT_PER_PIXCEL
-    global HEIGHT
-    global WIDTH
-    global HISTGRAMS_DICT
-    global HISTGRAMS
-
     if request.method == 'POST':
-        # save img
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
         file_posted = request.files['file']
-        FILE_PATH = os.path.join('/tmp/', file_posted.filename)
-        file_posted.save(FILE_PATH)
+
+        if file_posted.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        
+        if file_posted and allowd_file(file_posted.filename):
+            # save img
+            filename = secure_filename(file_posted.filename)
+            filepath = Path(app.config['UPLOAD_FOLDER'] + filename)
+            file_posted.save(filepath)
+            # return redirect(url_for('process', name=filename))
 
         # load img
-        FILE_HEADER, INFO_HEADER, COLOR_PALLETES, IMG = main.read_win_bmp(FILE_PATH)
-        BIT_PER_PIXCEL = int.from_bytes(INFO_HEADER.bcBitCount, main.BYTE_ORDER)
-        HEIGHT = int.from_bytes(INFO_HEADER.bcHeight, main.BYTE_ORDER)
-        WIDTH = int.from_bytes(INFO_HEADER.bcWidth, main.BYTE_ORDER)
+        # file_header, info_header, color_palletes, img = main.read_win_bmp(filepath)
+        # bit_per_pixcel = int.from_bytes(info_header.bcBitCount, main.BYTE_ORDER)
+        # height = int.from_bytes(info_header.bcHeight, main.BYTE_ORDER)
+        # width = int.from_bytes(info_header.bcWidth, main.BYTE_ORDER)
 
         # hisrgram
-        HISTGRAMS_DICT = main.generate_histgram(IMG, BIT_PER_PIXCEL, HEIGHT, WIDTH, False)
-        HISTGRAMS = main.defaultDictHistgrams2List(HISTGRAMS_DICT, BIT_PER_PIXCEL)
-        return redirect('/process')
+        # histgram_dict = main.generate_histgram(img, bit_per_pixcel, height, width, False)
+        # histgram = main.defaultDictHistgrams2List(histgram_dict, bit_per_pixcel)
+        # return redirect('/process')
     return render_template('upload.html')
 
 @app.route('/process', methods=['GET', 'POST'])
