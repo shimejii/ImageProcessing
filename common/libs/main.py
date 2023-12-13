@@ -1,7 +1,7 @@
 import sys
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 from dataclasses import dataclass
 from collections import defaultdict
 from matplotlib import pyplot as plt
@@ -145,16 +145,16 @@ def read_win_bmp(path_file_in: Path) -> Tuple[FileHeader, InfoHeader, dict, list
         
     return file_header, info_header, palettes, img
 
-def write_win_bmp(path_file_out :str, file_header : FileHeader,
-                  info_header: InfoHeader, palettes : dict, img : list):
-    
-    with open(path_file_out, 'wb') as fp_out:
-        # write
-        fp_out = open(path_file_out, 'wb')
-
+def write_win_bmp(path_file_out: Path, file_header: FileHeader,
+                  info_header: InfoHeader, palettes: dict, img : List):
+    with path_file_out.open('wb') as fp_out:
         # header
         ## file header
         fp_out.write(file_header.bfType)
+        if file_header.bfType != b"BM":
+            raise NotSupportedFileTypeError(
+                f"This file is not Windows bitmap. This file magic number is {file_header.bfType}"
+                )
         fp_out.write(file_header.bfSize)
         fp_out.write(file_header.bfReserved1)
         fp_out.write(file_header.bfReserved2)
