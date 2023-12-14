@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv(dotenv_path='./.env')
+
 from app import app
 import pytest
 from pathlib import Path
@@ -10,6 +13,7 @@ from pathlib import Path
 def test_validation_serverside_normal_case_1():
     app.config['TESTING'] = True
     client = app.test_client()
+
 
     file_name_in = "./s_bmp/win-32.bmp"
     path_file_input = Path(file_name_in)

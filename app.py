@@ -16,7 +16,11 @@ ALLOWED_EXTENSIONS = {'bmp', 'rle', 'dib'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.secret_key = 'hogehoge'
+# flask automatically set .env variables if python-dotenv is installed
+# In the development environment, secret_key is already exported.
+app.secret_key = os.environ.get('SECRET_KEY', '')
+if app.secret_key == '':
+    raise ValueError('secret_key is not loaded')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
