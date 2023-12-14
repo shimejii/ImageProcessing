@@ -27,7 +27,7 @@ def test_validation_serverside_normal_case_1():
     response_after_redirect = client.get(response.headers['Location'], follow_redirects=True)
     # print(str(response_after_redirect.data))
     assert b'Upload Windows BMP file'
-    assert b'successfully uploaded' in response_after_redirect.data
+    assert b'process windows bitmap file' in response_after_redirect.data
 
 # バリデーション サーバーサイド
 ## 異常

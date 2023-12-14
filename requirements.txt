@@ -3,4 +3,4 @@ gunicorn
 matplotlib
 pytest
 python-dotenv
-
+flask-session
