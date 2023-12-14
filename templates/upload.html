@@ -2,6 +2,19 @@
 {% block title %}{{ super() }}{% endblock %}
 {% block content %}
 <h1 class="mb-3">Upload Windows BMP file</h1>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert alert-danger">
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+
+
 <form method="POST" enctype="multipart/form-data">
     <div class="row">
         <div class="col-sm">

@@ -4,6 +4,7 @@ from flask import request
 from flask import render_template
 from flask import redirect
 from flask import url_for
+from my_exception import NotSupportedFileTypeError
 from werkzeug.utils import secure_filename
 import os
 import main
@@ -15,8 +16,13 @@ ALLOWED_EXTENSIONS = {'bmp', 'rle', 'dib'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# flask automatically set .env variables if python-dotenv is installed
+# In the development environment, secret_key is already exported.
+app.secret_key = os.environ.get('SECRET_KEY', '')
+if app.secret_key == '':
+    raise ValueError('secret_key is not loaded')
 
-def allowd_file(filename):
+def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
@@ -32,22 +38,27 @@ def home():
             flash('No selected file')
             return redirect(request.url)
         
-        if file_posted and allowd_file(file_posted.filename):
+        if not allowed_file(file_posted.filename):
+            flash('Not suport this file format')
+            return redirect(request.url)
+        
+        if file_posted and allowed_file(file_posted.filename):
             # save img
             filename = secure_filename(file_posted.filename)
             filepath = Path(app.config['UPLOAD_FOLDER'] + filename)
             file_posted.save(filepath)
             # return redirect(url_for('process', name=filename))
 
-        # load img
-        # file_header, info_header, color_palletes, img = main.read_win_bmp(filepath)
-        # bit_per_pixcel = int.from_bytes(info_header.bcBitCount, main.BYTE_ORDER)
-        # height = int.from_bytes(info_header.bcHeight, main.BYTE_ORDER)
-        # width = int.from_bytes(info_header.bcWidth, main.BYTE_ORDER)
-
-        # hisrgram
-        # histgram_dict = main.generate_histgram(img, bit_per_pixcel, height, width, False)
-        # histgram = main.defaultDictHistgrams2List(histgram_dict, bit_per_pixcel)
+            # load img
+            ## excluding unsupported bmp files.
+            ## not discernible from the extension.
+            try:
+                _, _, _, _ = main.read_win_bmp(filepath)
+            except NotSupportedFileTypeError as e:
+                flash(str(e))
+                return redirect(request.url)
+            flash("successfully uploaded")
+            return redirect(request.url)
         # return redirect('/process')
     return render_template('upload.html')
 

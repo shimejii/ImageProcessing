@@ -2,3 +2,4 @@
 *.jpg
 my_env/
 .vscode/
+.env

@@ -2,3 +2,5 @@ flask
 gunicorn
 matplotlib
 pytest
+python-dotenv
+
