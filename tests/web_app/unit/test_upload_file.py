@@ -2,7 +2,8 @@ from pathlib import Path
 import subprocess
 import difflib
 
-SAVE_DIR = '/tmp/'
+# SAVE_DIR = '/tmp/'
+SAVE_DIR = './static/'
 
 
 # 画像データ保存
