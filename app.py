@@ -7,11 +7,13 @@ from flask import session
 from flask import url_for
 from flask_session import Session
 from my_exception import NotSupportedFileTypeError
+from pathlib import Path
+from typing import Dict
+from typing import List
 from werkzeug.utils import secure_filename
 import os
 import main
 import sys
-from pathlib import Path
 
 # UPLOAD_FOLDER = '/tmp/'
 UPLOAD_FOLDER = './static/'
@@ -82,7 +84,19 @@ def process():
     #     HISTGRAMS_DICT = main.generate_histgram(IMG, BIT_PER_PIXCEL, HEIGHT, WIDTH, False)
     #     HISTGRAMS = main.defaultDictHistgrams2List(HISTGRAMS_DICT, BIT_PER_PIXCEL)
     filepath = str(session.get('file_path', ''))
-    return render_template('process.html', filepath=filepath)
+    try:
+        file_header, info_header, color_palletes, img = main.read_win_bmp(Path(filepath))
+    except (NotSupportedFileTypeError, OSError) as e:
+        flash(str(e))
+        redirect(url_for('upload'))
+    bit_per_pixcel = int.from_bytes(info_header.bcBitCount, main.BYTE_ORDER)
+    height = int.from_bytes(info_header.bcHeight, main.BYTE_ORDER)
+    width = int.from_bytes(info_header.bcWidth, main.BYTE_ORDER)
+
+    histgram_d: Dict = main.generate_histgram(img, bit_per_pixcel, height, width, False)
+    histgram_l: List = main.defaultDictHistgrams2List(histgram_d, bit_per_pixcel)
+    return render_template('process.html', filepath=filepath, histgrams=histgram_l)
+
 
 if __name__ == '__main__':
     app.run()

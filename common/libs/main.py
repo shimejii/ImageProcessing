@@ -42,6 +42,19 @@ class ColorPalette:
     rgbReserved : bytes
     
 def read_win_bmp(path_file_in: Path) -> Tuple[FileHeader, InfoHeader, dict, list]:
+    """
+    Load a windows bitmap file and save it separately as two headers, color palettes, and image data (3-D list).
+
+    Args:
+        path_file_in (Path): input file path
+
+    Returns:
+        tuple: two headers, color palletes, and image data
+
+    Raises:
+        NotSupportedFileTypeError: Sends when an unsupported file format or unsupported bitmap file is read.Detect from the header information of a bitmap file
+        OSError: errors with open()
+    """
     with path_file_in.open('rb') as fp_in:
         # header
         ## file header
