@@ -7,15 +7,15 @@
     <li class="nav-item">
         <a href="#cur_image" class="nav-link" data-bs-toggle="tab">image</a>
     </li>
-    <!-- <li class="nav-item">
+    <li class="nav-item">
         <a href="#histgram" class="nav-link" data-bs-toggle="tab">histgram</a>
-    </li> -->
+    </li>
 </ul>
 <div class="tab-content">
     <div id="cur_image" class="tab-pane active">
         <img src="{{ filepath }}" alt="posted image file">
     </div>
-    <!-- <div id="histgram" class="tab-pane">
+    <div id="histgram" class="tab-pane">
         <canvas id="histgram_canvas_red" width="300" height="200"></canvas>
         <canvas id="histgram_canvas_green" width="300" height="200"></canvas>
         <canvas id="histgram_canvas_blue" width="300" height="200"></canvas>
@@ -29,7 +29,7 @@
             for (i=0; i < 256; i++) {
                 x.push(i);
             }
-            let hist = {# histgrams|tojson #};
+            let hist = {{ histgrams|tojson }};
             console.log(hist);
 
             var data_blue = {
@@ -82,7 +82,7 @@
             );
 
         </script>
-    </div> -->
+    </div>
 </div>
 <!-- <h2>about process</h2>
 <div>
