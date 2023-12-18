@@ -84,9 +84,9 @@
         </script>
     </div>
 </div>
-<!-- <h2>about process</h2>
+<h2>about process</h2>
 <div>
-    <form method="POST">
+    <form method="POST" action="/process">
         <div>
             <p>処理<br>
             <input type="radio" name="process" value="binarize" checked>
@@ -101,15 +101,15 @@
         </div>
         <div>
             <p>適用する次元(RGB)<br>
-            <input type="radio" name="apply_dim" value="0" checked>
-            <label>Blue</label>
+            <input type="radio" name="apply_dim" value="2" checked>
+            <label>Red</label>
             <input type="radio" name="apply_dim" value="1">
             <label>Green</label>
-            <input type="radio" name="apply_dim" value="2">
-            <label>Red</label>
+            <input type="radio" name="apply_dim" value="0">
+            <label>Blue</label>
             </p>
         </div>
         <button type="submit" value="process" class="btn btn-primary">process</button>
     </form>
-</div> -->
+</div>
 {% endblock %}

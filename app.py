@@ -73,16 +73,6 @@ def home():
 
 @app.route('/process', methods=['GET', 'POST'])
 def process():
-    # if request.method == 'POST' and request.form.get('process') == 'binarize':
-    #     # binarization
-    #     cmd = request.form.get('process')
-    #     method = request.form.get('binarize-method')
-    #     apply_dim = int(request.form.get('apply_dim'))
-    #     print(f'cmd : {cmd}¥nmethod : {method}¥n, apply_dim : {apply_dim}¥n', sys.stdout)
-    #     main.process(IMG, BIT_PER_PIXCEL, HEIGHT, WIDTH, cmd, method, apply_dim)
-    #     main.write_win_bmp(FILE_PATH, FILE_HEADER, INFO_HEADER, COLOR_PALLETES, IMG)
-    #     HISTGRAMS_DICT = main.generate_histgram(IMG, BIT_PER_PIXCEL, HEIGHT, WIDTH, False)
-    #     HISTGRAMS = main.defaultDictHistgrams2List(HISTGRAMS_DICT, BIT_PER_PIXCEL)
     filepath = str(session.get('file_path', ''))
     try:
         file_header, info_header, color_palletes, img = main.read_win_bmp(Path(filepath))
@@ -92,6 +82,17 @@ def process():
     bit_per_pixcel = int.from_bytes(info_header.bcBitCount, main.BYTE_ORDER)
     height = int.from_bytes(info_header.bcHeight, main.BYTE_ORDER)
     width = int.from_bytes(info_header.bcWidth, main.BYTE_ORDER)
+
+    # image process
+    if request.method == 'POST':
+        cmd = request.form.get('process')
+        if request.form.get('process') == 'binarize':
+        ## binarization
+            method = request.form.get('binarize-method')
+            apply_dim = int(request.form.get('apply_dim'))
+            print(f'cmd : {cmd}¥nmethod : {method}¥n, apply_dim : {apply_dim}¥n', sys.stdout)
+            main.process(img, bit_per_pixcel, height, width, cmd, method, apply_dim)
+            main.write_win_bmp(Path(filepath), file_header, info_header, color_palletes, img)
 
     histgram_d: Dict = main.generate_histgram(img, bit_per_pixcel, height, width, False)
     histgram_l: List = main.defaultDictHistgrams2List(histgram_d, bit_per_pixcel)
