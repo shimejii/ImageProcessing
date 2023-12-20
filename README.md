@@ -23,12 +23,14 @@ The execution method is as follows:
 1. CLI
 
     ```
+    git clone https://github.com/shimejii/ImageProcessing.git
+    cd ImageProcessing
+    PWD1=`pwd`
     python -m venv my_env
     pip install -r requirements.txt
-    git clone https://github.com/shimejii/ImageProcessing.git
-    cd ImageProcessing/common/libs
-    PWD=`pwd`
-    export PYTHONPATH=${PWD}:${PYTHONPATH}
+    cd ./common/libs
+    PWD2=`pwd`
+    export PYTHONPATH=${PWD2}:${PWD1}:${PYTHONPATH}
     python main.py INPUT_FILE OUTPUT_FILE [CMD METHOD APPLY_DIM] 
     ```
 
@@ -46,3 +48,6 @@ The execution method is as follows:
 - Otsu
 
     use Otsu's method
+
+## bmp file sample
+Please refer to the following site for [sample bmp files](https://www.setsuki.com/hsp/ext/s_bmp.zip)
