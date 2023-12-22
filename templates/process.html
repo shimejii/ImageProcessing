@@ -91,25 +91,73 @@
             <p>処理<br>
             <input type="radio" name="process" value="binarize" checked>
             <label>binarization</label> 
+            <input type="radio" name="process" value="convolution">
+            <label>convolution</label> 
             </p>
         </div>
-        <div>
-            <p>手法<br>
-            <input type="radio" name="binarize-method" value="Otsu" checked>
-            <label>Otsu's method</label>
-            </p>
+        <div id="binarization_options">
+            <div>
+                <p>手法<br>
+                <input type="radio" name="binarize-method" value="Otsu" checked>
+                <label>Otsu's method</label>
+                </p>
+            </div>
+            <div>
+                <p>適用する次元(RGB)<br>
+                <input type="radio" name="apply_dim" value="2" checked>
+                <label>Red</label>
+                <input type="radio" name="apply_dim" value="1">
+                <label>Green</label>
+                <input type="radio" name="apply_dim" value="0">
+                <label>Blue</label>
+                </p>
+            </div>
         </div>
-        <div>
-            <p>適用する次元(RGB)<br>
-            <input type="radio" name="apply_dim" value="2" checked>
-            <label>Red</label>
-            <input type="radio" name="apply_dim" value="1">
-            <label>Green</label>
-            <input type="radio" name="apply_dim" value="0">
-            <label>Blue</label>
-            </p>
+        <div id="convolution_options">
+            <div>
+                <p>フィルタ<br>
+                <input type="radio" name="filter" value="sobel" checked>
+                <label>Sobel filter</label>
+                </p>
+            </div>
+            <div>
+                <p>適用する次元(RGB)<br>
+                <input type="radio" name="apply_dim_convolution" value="2" checked>
+                <label>Red</label>
+                <input type="radio" name="apply_dim_convolution" value="1">
+                <label>Green</label>
+                <input type="radio" name="apply_dim_convolution" value="0">
+                <label>Blue</label>
+                </p>
+            </div>
         </div>
         <button type="submit" value="process" class="btn btn-primary">process</button>
     </form>
 </div>
+<script>
+    var processRadios = document.getElementsByName('process');
+    var binarizationOptions = document.getElementById('binarization_options');
+    var convolutionOptions = document.getElementById('convolution_options');
+
+    function toggleOptionsVisibility() {
+        // すべての選択肢を非表示にする
+        binarizationOptions.classList.add('d-none');
+        convolutionOptions.classList.add('d-none');
+
+        // 選択されたプロセスに応じて選択肢を表示
+        if (processRadios[0].checked) {
+            binarizationOptions.classList.remove('d-none');
+        } else if (processRadios[1].checked) {
+            convolutionOptions.classList.remove('d-none');
+        }
+    }
+
+    // ページロード時に初期状態を設定
+    toggleOptionsVisibility();
+
+    // ラジオボタンの変更イベントを追加
+    processRadios.forEach(function(radio) {
+        radio.addEventListener('change', toggleOptionsVisibility);
+    });
+</script>
 {% endblock %}
